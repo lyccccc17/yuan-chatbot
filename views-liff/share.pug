@@ -1,0 +1,52 @@
+extends layout
+
+block beforehtml
+  - var title = '分享好友'
+
+block style
+  link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css")
+  style
+    :sass
+      html, body
+        height: 100%
+        width: 100vw
+      body
+        background-color: #fff7dd
+        background-image: linear-gradient(to bottom, #ffffff 0%,#fff7dd 50%,#fff0c3 100%)
+        background-attachment: fixed
+      .img-loading
+        display: block
+        margin: 0 auto
+        width: 192px
+        height: 192px
+
+block content
+  #app.container.my-3
+    img.img-loading(src="https://storage.googleapis.com/youbike-chatbot-photo/theme-golden-age/icons/redirect-loading.png")
+    h3.text-center.my-3 3 秒後自動跳轉
+
+block script
+  script(src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.15/lodash.min.js")
+  script(src="https://static.line-scdn.net/liff/edge/2/sdk.js")
+  script.
+    const loginPromise = (async () => {
+      await liff.init({ liffId: '#{liff_id}' })
+      if (!liff.isLoggedIn()) {
+        liff.login({ redirectUri: location.href })
+        return await new Promise(resolve => {}) // 永遠不會結束的 Promise
+      }
+      const profile = await liff.getProfile()
+      if (!profile.userId) throw new Error('無法取得 userId')
+      if (window.gtagSetLineId) window.gtagSetLineId(profile.userId)
+      return profile
+    })()
+    window.sleep = t => new Promise(resolve => { setTimeout(resolve, t) })
+
+    const redirect = async () => {
+      await loginPromise
+      await window.sleep(3000)
+      liff.openWindow({ url: 'https://line.me/R/ti/p/@youbike' })
+      await window.sleep(1000)
+      liff.closeWindow()
+    }
+    redirect()

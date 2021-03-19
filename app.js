@@ -1,13 +1,20 @@
 require('dotenv').config() // process.env
 
 // 選擇 Heroku 作為伺服器
-const express = require('express') // 伺服器端用的模組
 const { client, middleware } = require('./libs/lineat')
+const express = require('express') // 伺服器端用的模組
+const path = require('path')
 
 const { getLongboardStores, getPlaygrounds, getTypeDetail } = require('./getData')
 const flexText = require('./views/flexText')
 
 const app = express() // 取得 express 實體
+
+// 在 express 中使用範本引擎
+// https://expressjs.com/zh-tw/guide/using-template-engines.html
+const viewBaseDir = path.join(__dirname, 'views-liff') // Returns: '/.../views-liff'
+app.set('views', viewBaseDir)
+app.set('view engine', 'pug')
 
 // 讀取資料
 const getStores = async () => {
@@ -38,7 +45,7 @@ const handleEvent = async event => {
   }
 }
 
-app.post('/', middleware, (req, res) => {
+app.use('/', middleware, (req, res) => {
   Promise
     .all(req.body.events.map(handleEvent))
     .then((result) => { res.json(result) })
@@ -46,6 +53,7 @@ app.post('/', middleware, (req, res) => {
       console.log(err)
     })
 })
+app.use('/liff', require('./routes/liff'))
 
 app.listen(process.env.PORT || 3000, async () => {
   console.log('Express server start')

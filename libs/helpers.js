@@ -8,6 +8,12 @@ exports.getenv = (key, defaultval) => {
   return _.get(process, ['env', key], defaultval)
 }
 
+exports.liffIds = {
+  full: exports.getenv('LIFF_FULL'),
+  tall: exports.getenv('LIFF_TALL'),
+  compact: exports.getenv('LIFF_COMPACT'),
+}
+
 exports.toGoogleMap = location => {
   const baseUrl = 'https://www.google.com/maps/search/?'
   const query = {
